@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Compressor</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to bottom right, #4CAF50, #8BC34A); /* Gradient Background */
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Sidebar styling */
+        #sidebar {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            margin-left: 50px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            flex: 1;
+            max-width: 300px;
+        }
+
+        /* Fixed Icon for Awais Malik */
+        #icon {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #ffffff;
+            color: #4CAF50;
+            font-size: 28px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #icon:hover {
+            background-color: #f0f0f0;
+        }
+
+        #icon:active {
+            background-color: #e0e0e0;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        /* Style for Drag-and-Drop box */
+        #dragArea {
+            width: 300px;
+            height: 200px;
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #4CAF50;
+            font-size: 18px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            padding: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #dragArea:hover {
+            background-color: #f0f0f0;
+        }
+
+        #dragArea:active {
+            background-color: #e0e0e0;
+        }
+
+        #compressedImage {
+            margin-top: 30px;
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #downloadBtn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px 40px;
+            font-size: 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 30px;
+            display: none; /* Hide the button initially */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+        }
+
+        #downloadBtn:hover {
+            background-color: #45a049;
+        }
+
+        #downloadBtn:active {
+            background-color: #3e8e41;
+        }
+
+        #loadingSpinner {
+            display: none;
+            margin-top: 30px;
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        #imageSize {
+            font-size: 16px;
+            margin-top: 20px;
+            color: #ffffff;
+        }
+
+        /* Style for main content section */
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+            flex-direction: row;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        /* Modal Style */
+        #permissionModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            text-align: center;
+        }
+
+        #permissionModal button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        #permissionModal button:hover {
+            background-color: #45a049;
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- Fixed Icon for Awais Malik -->
+<div id="icon">
+    AM
+</div>
+
+<!-- Main Content Section with Sidebar and Image -->
+<div class="main-container">
+    <div class="content">
+        <h1>Image Compressor</h1>
+        <!-- Drag-and-Drop Area -->
+        <div id="dragArea">
+            Drag & Drop Your Image Here
+        </div>
+        <div id="loadingSpinner">Compressing...</div>
+        <button id="downloadBtn">Download Compressed Image</button>
+
+        <!-- Compression Quality Slider -->
+        <div style="margin-top: 20px;">
+            <label for="qualitySlider" style="color: white; font-size: 18px;">Compression Quality: <span id="qualityValue">70</span>%</label>
+            <input type="range" id="qualitySlider" min="10" max="100" value="70" style="width: 100%;">
+        </div>
+
+        <!-- Original and Compressed Image Size -->
+        <div id="imageSize">
+            <p id="originalSize">Original Size: </p>
+            <p id="compressedSize">Compressed Size: </p>
+        </div>
+    </div>
+
+    <!-- Sidebar displaying the image -->
+    <div id="sidebar">
+        <img id="compressedImage" src="" alt="Compressed Image" style="display: none;">
+    </div>
+</div>
+
+<canvas id="canvas" style="display:none;"></canvas>
+
+<script>
+    const dragArea = document.getElementById("dragArea");
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    const compressedImage = document.getElementById("compressedImage");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const loadingSpinner = document.getElementById("loadingSpinner");
+    const canvas = document.getElementById("canvas");
+    const canvasContext = canvas.getContext("2d");
+
+    const originalSizeText = document.getElementById("originalSize");
+    const compressedSizeText = document.getElementById("compressedSize");
+    const qualitySlider = document.getElementById("qualitySlider");
+    const qualityValue = document.getElementById("qualityValue");
+
+    dragArea.addEventListener("click", () => fileInput.click());
+
+    fileInput.addEventListener("change", handleImageUpload);
+
+    dragArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dragArea.style.backgroundColor = "#f0f0f0";
+    });
+
+    dragArea.addEventListener("dragleave", () => {
+        dragArea.style.backgroundColor = "white";
+    });
+
+    dragArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith("image/")) {
+            handleImageUpload({ target: { files: [file] } });
+        } else {
+            alert("Please drop a valid image file.");
+        }
+    });
+
+    let originalImage = null;  // Store the original image
+
+    function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (file && file.type.startsWith("image/")) {
+            // Display original image size
+            const originalSizeKB = (file.size / 1024).toFixed(2);
+            originalSizeText.innerHTML = `Original Size: ${originalSizeKB} KB`;
+
+            // Show loading spinner
+            displayLoading(true); 
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const image = new Image();
+                image.src = e.target.result;
+                image.onload = function() {
+                    originalImage = image;  // Store the original image
+                    compressImage(image);
+                };
+            };
+            reader.readAsDataURL(file);
+        } else {
+            alert("Please select a valid image file.");
+        }
+    }
+
+    function compressImage(image) {
+        const maxWidth = 800;
+        const maxHeight = 500;
+
+        let width = image.width;
+        let height = image.height;
+
+        if (width > height) {
+            if (width > maxWidth) {
+                height *= maxWidth / width;
+                width = maxWidth;
+            }
+        } else {
+            if (height > maxHeight) {
+                width *= maxHeight / height;
+                height = maxHeight;
+            }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        canvasContext.drawImage(image, 0, 0, width, height);
+
+        const quality = qualitySlider.value / 100; // Convert to decimal value for compression quality
+        const compressedDataUrl = canvas.toDataURL("image/jpeg", quality); 
+
+        // Display compressed image size
+        const compressedSizeKB = (compressedDataUrl.length * (3 / 4) / 1024).toFixed(2); // Base64 encoded size
+        compressedSizeText.innerHTML = `Compressed Size: ${compressedSizeKB} KB`;
+
+        compressedImage.src = compressedDataUrl;
+        compressedImage.style.display = "block";  // Show the compressed image
+
+        // Show download button and hide loading spinner
+        displayLoading(false);
+        downloadBtn.style.display = "inline-block";  // Ensure the download button is visible
+
+        // Add event listener for the download button
+        downloadBtn.onclick = function() {
+            downloadCompressedImage(compressedDataUrl);
+        };
+    }
+
+    qualitySlider.addEventListener("input", () => {
+        qualityValue.innerText = qualitySlider.value;
+        if (originalImage) {
+            compressImage(originalImage);  // Recompress image with new quality
+        }
+    });
+
+    function downloadCompressedImage(dataUrl) {
+        const a = document.createElement("a");
+        a.href = dataUrl;
+        a.download = "compressed_image.jpg";
+        a.click();
+    }
+
+    function displayLoading(isLoading) {
+        if (isLoading) {
+            loadingSpinner.style.display = "block";
+        } else {
+            loadingSpinner.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>
